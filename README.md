@@ -27,4 +27,4 @@ print diffy.Diff(string1, string2).generate(title='Testing Diffy!', names=['myst
 
 Write the output of the above script to an HTML file and open it in a browser to see your diff. Here's a screenshot of above script:
 
-![](https://raw.githubusercontent.com/viranch/diffy/master/screens/html.png)
+<img src="https://raw.githubusercontent.com/viranch/diffy/master/screens/html.png" width="545">
