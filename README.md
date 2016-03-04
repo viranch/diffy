@@ -1,7 +1,7 @@
 diffy - Easy diffing in Python
 ==============================
 
-This is an (incomplete) Python port of https://github.com/samg/diffy.
+This is a (partial) Python port of https://github.com/samg/diffy.
 
 > It provides a convenient way to generate a diff from two strings or files. Instead of reimplementing the LCS diff algorithm Diffy uses battle tested Unix diff to generate diffs, and focuses on providing a convenient interface, and getting out of your way.
 
