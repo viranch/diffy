@@ -25,4 +25,6 @@ That's swell
 print diffy.Diff(string1, string2).generate(title='Testing Diffy!', names=['mystr1', 'mystr2'])
 ```
 
-Write the output of the above script to an HTML file and open it in a browser to see your diff.
+Write the output of the above script to an HTML file and open it in a browser to see your diff. Here's a screenshot of above script:
+
+![](https://raw.githubusercontent.com/viranch/diffy/master/screens/html.png)
