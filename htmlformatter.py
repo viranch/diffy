@@ -175,6 +175,7 @@ class HtmlFormatter:
     width: 100%
 }
 .d2h-diff-tbody>tr>td>div {
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
     height: 16px;
     line-height: 16px
 }
