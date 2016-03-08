@@ -327,7 +327,7 @@ ins.d2h-change {
         body = '''
 <body style="text-align: center; font-family: 'Source Sans Pro',sans-serif;">
 <div id="diff">
-    
+
 <div class="d2h-wrapper">
   <div id="d2h-860589" class="d2h-file-wrapper" data-lang="txt">
   <div class="d2h-file-header">
