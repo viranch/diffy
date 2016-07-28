@@ -1,5 +1,6 @@
 from tempfile import NamedTemporaryFile
 
+
 class TmpFiles:
     def __init__(self, contents=[]):
         self.files = []

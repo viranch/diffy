@@ -32,3 +32,16 @@ print diffy.Diff(string1, string2).generate(title='Testing Diffy!', names=['myst
 Write the output of the above script to an HTML file and open it in a browser to see your diff. Here's a screenshot of the HTML produced by above script:
 
 <img src="https://raw.githubusercontent.com/viranch/diffy/master/screens/html.png" width="545">
+
+Highlighting words is less performant for large diffs, in which case you can turn it off with `simple=True` argument:
+
+```python
+print diffy.Diff(string1, string2).generate(title='Testing Diffy!', names=['mystr1', 'mystr2'], simple=True)
+```
+
+If you want to see some lines before and after each changed line, pass `show_unchanged=3` or whatever number of lines you want:
+
+
+```python
+print diffy.Diff(string1, string2).generate(title='Testing Diffy!', names=['mystr1', 'mystr2'], simple=True, show_unchanged=3)
+```

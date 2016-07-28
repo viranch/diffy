@@ -1,6 +1,7 @@
 import cgi
 from differ import Differ
 
+
 class HtmlFormatter:
 
     def __init__(self, differ, title, names):
@@ -8,8 +9,18 @@ class HtmlFormatter:
         self.diff_title = title
         self.content_names = names
 
-    def generate(self):
-        return HtmlFormatter.wrap_lines(self.highlighted_words(), self.diff_title, self.content_names)
+    def generate(self, highlight_words=False, only_body=False):
+        if highlight_words:
+            lines = self.highlighted_words()
+        else:
+            lines = [HtmlFormatter.wrap_line(l) for l in self.differ.lines()]
+
+        diff_block = HtmlFormatter.wrap_lines(lines, self.diff_title, self.content_names)
+
+        if only_body:
+            return diff_block
+
+        return HtmlFormatter.wrap_body(diff_block, self.diff_title)
 
     def highlighted_words(self, wrap_lines=True):
         chunks = [chunk for chunk in self.differ.chunks() if chunk != '\ No newline at end of file\n']
@@ -27,7 +38,7 @@ class HtmlFormatter:
             chunk2 = chunks[index+1]
 
             if chunk1[0] == '-' and chunk2[0] == '+':
-                line_diff = Differ(self.split_chars(chunk1), self.split_chars(chunk2), show_unchanged=True)
+                line_diff = Differ(self.split_chars(chunk1), self.split_chars(chunk2), show_unchanged=10000)
                 hi1 = self.reconstruct_chars(line_diff, '-')
                 hi2 = self.reconstruct_chars(line_diff, '+')
                 processed.append(index+1)
@@ -48,7 +59,7 @@ class HtmlFormatter:
         if wrap_lines:
             return [w for w in wrapped if w is not None]
         else:
-            return [w[1:] for w in wrapped if w not in ['','+','-']]
+            return [w[1:] for w in wrapped if w not in ['', '+', '-']]
 
     def split_chars(self, chunk):
         lines = []
@@ -69,15 +80,15 @@ class HtmlFormatter:
                 if i > 1 and i < len(enum) and len(l.split("\n")) < 4:
                     diff += self.highlight(l, line_type)
                 else:
-                    diff += ''.join([s[1:] for s in l.split("\n")]).replace("\n",'').replace('\\r', '\r').replace('\\n', '\n')
+                    diff += ''.join([s[1:] for s in l.split("\n")]).replace("\n", '').replace('\\r', '\r').replace('\\n', '\n')
         # .strip() is required to remove trailing "\n"
-        tag = 'ins' if line_type=='+' else 'del'
-        return [line_type+l.replace('</{0}><{0}>'.format(tag),'').replace('<{0}></{0}>'.format(tag),'') for l in diff.strip().split("\n")]
+        tag = 'ins' if line_type == '+' else 'del'
+        return [line_type+line.replace('</{0}><{0}>'.format(tag), '').replace('<{0}></{0}>'.format(tag), '') for line in diff.strip().split("\n")]
 
     def highlight(self, lines, line_type):
-        tag = 'ins' if line_type=='+' else 'del'
+        tag = 'ins' if line_type == '+' else 'del'
         lines = ''.join(l[1:] for l in lines.split("\n"))
-        lines = lines.replace('\\n', '<LINE_BOUNDARY>').replace('\n','').replace('<LINE_BOUNDARY>','</{0}>\n<{0}>'.format(tag))
+        lines = lines.replace('\\n', '<LINE_BOUNDARY>').replace('\n', '').replace('<LINE_BOUNDARY>', '</{0}>\n<{0}>'.format(tag))
         return "<{1}>{0}</{1}>".format(lines, tag)
 
     @staticmethod
@@ -90,7 +101,11 @@ class HtmlFormatter:
             tag = {'+': 'ins', '-': 'del'}[line[0]]
         except:
             tag = 'dummy'
-        return '    <tr><td class="d2h-{0} d2h-change"><div class="d2h-code-line d2h-{0} d2h-change"><span class="d2h-code-line-prefix">{1}</span><span class="d2h-code-line-ctn hljs">{2}</span></div></td></tr>'.format(tag, line[0], cleaned)
+
+        line1 = '<span class="d2h-code-line-prefix">{0}</span>'.format(line[0])
+        line2 = '<span class="d2h-code-line-ctn hljs">{0}</span>'.format(cleaned)
+
+        return '<tr><td class="d2h-{0} d2h-change"><div class="d2h-code-line d2h-{0} d2h-change">{1}{2}</div></td></tr>'.format(tag, line1, line2)
 
     @staticmethod
     def clean_line(line):
@@ -98,19 +113,45 @@ class HtmlFormatter:
 
     @staticmethod
     def wrap_lines(lines, title, names):
-        prefix = '''
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>'''+title+'''</title>
+        diff_lines = "\n".join(lines)
 
-    <!--
-        Diff to HTML (template.html)
-        Author: rtfpessoa
-    -->
+        return '''
+<div id="diff">
 
-    <style>
+<div class="d2h-wrapper">
+  <div class="d2h-file-wrapper" data-lang="txt">
+  <div class="d2h-file-header">
+    <span class="d2h-file-stats">
+      <span class="d2h-lines-deleted">
+        <span>{0}</span>
+      </span>
+      <span class="d2h-lines-added">
+        <span>{1}</span>
+      </span>
+    </span>
+    <span class="d2h-file-name-wrapper">
+        <span class="d2h-file-name">&nbsp;{2}</span>
+    </span>
+  </div>
+  <div class="d2h-file-diff">
+    <div class="d2h-code-wrapper">
+      <table class="d2h-diff-table">
+        <tbody class="d2h-diff-tbody">
+          {3}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</div>
+'''.format(names[0], names[1], title, diff_lines)
+
+    @staticmethod
+    def wrap_body(diff_block, title=''):
+        css = '''
 .d2h-code-line-prefix,
 .line-num1 {
     float: left
@@ -321,46 +362,24 @@ ins.d2h-change {
     font-size: 10px;
     cursor: pointer
 }
-    </style>
-</head>'''
-
-        body = '''
-<body style="text-align: center; font-family: 'Source Sans Pro',sans-serif;">
-<div id="diff">
-
-<div class="d2h-wrapper">
-  <div id="d2h-860589" class="d2h-file-wrapper" data-lang="txt">
-  <div class="d2h-file-header">
-    <span class="d2h-file-stats">
-      <span class="d2h-lines-deleted">
-        <span>{0}</span>
-      </span>
-      <span class="d2h-lines-added">
-        <span>{1}</span>
-      </span>
-    </span>
-    <span class="d2h-file-name-wrapper">
-        <span class="d2h-file-name">&nbsp;{2}</span>
-    </span>
-  </div>
-  <div class="d2h-file-diff">
-    <div class="d2h-code-wrapper">
-      <table class="d2h-diff-table">
-        <tbody class="d2h-diff-tbody">
-'''.format(names[0], names[1], title)
-
-        suffix = '''
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-</div>
-
-</div>
-</body>
-</html>
 '''
 
-        return '{0}\n{1}\n{2}\n{3}'.format(prefix, body, "\n".join(lines), suffix)
+        return '''
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{0}</title>
+
+    <!--
+        Diff to HTML (template.html)
+        Author: rtfpessoa
+    -->
+
+    <style>{1}</style>
+</head>
+<body style="text-align: center; font-family: 'Source Sans Pro',sans-serif;">
+{2}
+</body>
+</html>
+'''.format(title, css, diff_block)

@@ -1,22 +1,19 @@
 import subprocess
 from tmpfiles import TmpFiles
 
+
 class Differ:
 
-    def __init__(self, string1, string2, show_unchanged=False):
+    def __init__(self, string1, string2, show_unchanged=0):
         self.string1 = string1
         self.string2 = string2
         self.diff = None
         self.show_unchanged = show_unchanged
 
-    def get_tmp_files(self):
-        return TmpFile(self.string1), TmpFile(self.string2)
-
     def get_diff(self):
         if self.diff is None:
-            limit = 10000 if self.show_unchanged else 0
             with TmpFiles([self.string1, self.string2]) as tmp_files:
-                self.diff = subprocess.Popen(['diff', '-U', str(limit)]+tmp_files, stdout=subprocess.PIPE).communicate()[0]
+                self.diff = subprocess.Popen(['diff', '-U', str(self.show_unchanged)]+tmp_files, stdout=subprocess.PIPE).communicate()[0]
         return self.diff
 
     @staticmethod
