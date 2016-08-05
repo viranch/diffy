@@ -7,7 +7,7 @@ This is a (partial) Python port of https://github.com/samg/diffy.
 
 This module only generates HTML diffs (side-by-side not supported), and takes only strings as input (filenames not supported).
 
-The HTML diff theme is taken as-is (because I'm bad at CSS!) from http://rtfpessoa.xyz/diff2html/.
+The HTML diff theme is taken as-is (because I'm bad at CSS!) from https://diff2html.xyz/ ([Demo](https://diff2html.xyz/demo.html)).
 
 Getting Started
 ---------------
